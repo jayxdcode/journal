@@ -34,8 +34,23 @@
       padding: 8px;
     }
   </style>
-  <script>const queryStr = window.location.search; const urlParams = new URLSearchParams(queryStr); const input = urlParams.get('inp'); window.onLoad() => {if (input) {document.getElementById("output_only_mode").style.display = "block"; document.getElementById("default_mode").style.display = "none";} else {document.getElementById("output_only_mode").style.display = "none";}</script>
-</head>
+
+  <script>
+    const queryStr = window.location.search;
+    const urlParams = new URLSearchParams(queryStr);
+    const input = urlParams.get('inp');
+
+    window.onload = () => {
+	    if (input) {
+		    document.getElementById("output_only_mode").style.display = "block";
+		    document.getElementById("default_mode").style.display = "none";
+	    } else {
+		    document.getElementById("output_only_mode").style.display = "none";
+	    	document.getElementById("default_mode").style.display = "block";
+	    }
+    };
+  </script>
+  </head>
 
 <body class="source-code-pro-output default_mode">
   <h2>Encrypt Text (AES-256-GCM)</h2>
