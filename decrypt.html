@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Decrypt Text</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  <style>
+    .source-code-pro-output {
+      font-family: "Source Code Pro", monospace;
+      font-optical-sizing: auto;
+      font-weight: <weight>;
+      font-style: normal;
+    }
+
+    body {
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+
+    input,
+    textarea,
+    button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body class="source-code-pro-output">
+  <h2>Decrypt Text (AES-256-GCM)</h2>
+
+  <label>Password:</label>
+  <input type="password" id="passwordInput">
+
+  <label>Encrypted Text (Base64 with IV):</label>
+  <textarea id="encryptedInput" rows="15" placeholder="Paste encrypted text here..."></textarea>
+
+  <button onclick="decryptText()">Decrypt</button>
+
+  <label>Decrypted Text:</label>
+  <textarea id="decryptedOutput" rows="15" readonly placeholder="Output goes here."></textarea>
+
+  <script>
+    const queryStr = window.location.search;
+    const urlParams = new URLSearchParams(queryStr);
+    const input = urlParams.get('inp');
+
+    const salt = "static-salt";
+
+    async function generateKey(password) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: encoder.encode(salt),
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    async function decryptText() {
+      let password;
+      const encryptedCombined = document.getElementById("encryptedInput").value;
+      if (!encryptedCombined.includes(":")) return alert("Invalid input");
+
+      if (input) {
+        password = prompt("Enter decryption key: ");
+      } else {
+        password = document.getElementById("passwordInput").value;
+      }
+
+      const [ivBase64, encryptedBase64] = encryptedCombined.split(":");
+      const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+      const encryptedBytes = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+      const key = await generateKey(password);
+
+      try {
+        const decryptedBuffer = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv },
+          key,
+          encryptedBytes
+        );
+        const plainText = new TextDecoder().decode(decryptedBuffer);
+        document.getElementById("decryptedOutput").value = plainText;
+      } catch (err) {
+        alert("Decryption failed. Wrong password or corrupted data.");
+      }
+    }
+  </script>
+</body>
+</html>

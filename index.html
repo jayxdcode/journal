@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo</title>
+</head>
+
+<body>
+  <label for="enc">Encrypt</label>
+  <br />
+  <textarea rows=15 style="width: 100%;" name="Encrypt" id="enc" value="" />
+  
+  <button type="submit" onclick="enc()">Encrypt</button>
+  
+  <br />
+  <br />
+  
+  <label for="dcr">Decrypt</label>
+  <br />
+  <textarea rows=15 style="width: 100%;" name="Decrypt" id="dcr" value="" />
+  <button type="submit" onclick="dec()">Decrypt</button>
+  
+  <script>
+    function enc() {
+      var encodeText = document.getElementById("enc").value;
+      var encoderLink = "/encrypt.html?inp=" + encodeURIComponent(encodeText);
+      
+      window.open(encoderLink);
+    }
+    
+    function dec() {
+      var decodeText = document.getElementById("dec").value;
+      var decoderLink = "/decrypt.html?inp=" + encodeURIComponent(decodeText);
+      
+      window.open(decoderLink);
+    }
+  </script>
+</body>
+
+</html>
