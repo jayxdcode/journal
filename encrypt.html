@@ -14,9 +14,16 @@
       font-style: normal;
     }
     
-    body {
+    default_mode {
       max-width: 600px;
       margin: 2rem auto;
+    }
+
+    output_only_mode {
+      max-width: 600px;
+      margin: 2rem auto;
+      color: white;
+      background-color: black;
     }
     
     input,
@@ -27,6 +34,7 @@
       padding: 8px;
     }
   </style>
+  <script>const queryStr = window.location.search; const urlParams = new URLSearchParams(queryStr); const input = urlParams.get('inp'); window.onLoad() => {if (input) {document.getElementById("output_only_mode").style.display = "block"; document.getElementById("default_mode").style.display = "none";} else {document.getElementById("output_only_mode").style.display = "none";}</script>
 </head>
 
 <body class="source-code-pro-output default_mode">
@@ -95,12 +103,68 @@
       const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
       
       res = ivBase64 + ":" + encryptedBase64;
-      
+      document.getElementById("encryptedOutput").value = res;
+    }
+  </script>
+</body>
+
+<body class="source-code-pro-output output_only_mode">
+
+  <p id="output"></p>
+  
+  <script>
+    const queryStr = window.location.search
+    const urlParams = new URLSearchParams(queryStr)
+    const input = urlParams.get('inp')
+    
+    const salt = "static-salt";
+    
+    async function generateKey(password) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(password), { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: encoder.encode(salt),
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial, { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+    
+    async function encryptText() {
       if (input) {
-        document.body.innerText = res;
+        pass = prompt("Enter encryption key:  ")
       } else {
-        document.getElementById("encryptedOutput").value = res;
+        pass = document.getElementById("passwordInput").value;
       }
+      
+      const password = pass;
+      const plainText = document.getElementById("plainTextInput").value;
+      if (!password || !plainText) return alert("Password and text are required");
+      
+      const key = await generateKey(password);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encodedText = new TextEncoder().encode(plainText);
+      
+      const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv },
+        key,
+        encodedText
+      );
+      
+      const ivBase64 = btoa(String.fromCharCode(...iv));
+      const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
+      
+      res = ivBase64 + ":" + encryptedBase64;
+      document.getElementById("encryptedOutput").value = res;
     }
   </script>
 </body>
