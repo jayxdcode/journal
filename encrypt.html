@@ -29,7 +29,7 @@
   </style>
 </head>
 
-<body class="source-code-pro-output">
+<body class="source-code-pro-output default_mode">
   <h2>Encrypt Text (AES-256-GCM)</h2>
   
   <label>Password:</label>
@@ -97,7 +97,7 @@
       res = ivBase64 + ":" + encryptedBase64;
       
       if (input) {
-        document.body.value = res;
+        document.body.innerText = res;
       } else {
         document.getElementById("encryptedOutput").value = res;
       }
